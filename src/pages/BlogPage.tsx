@@ -2,12 +2,11 @@
 import React, { useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import Hero from "@/components/sections/Hero";
-import Services from "@/components/sections/Services";
-import Testimonials from "@/components/sections/Testimonials";
 import Contact from "@/components/sections/Contact";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import BlogList from "@/components/sections/BlogList";
 
-const Index = () => {
+const BlogPage = () => {
   useEffect(() => {
     // Reveal animations on scroll
     const revealElements = document.querySelectorAll('.reveal-animation');
@@ -33,10 +32,22 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main>
-        <Hero />
-        <Services />
-        <Testimonials />
+      <main className="flex-1">
+        <div className="container mx-auto px-6 pt-24 pb-6">
+          <Breadcrumb className="mb-8">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Blog</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <h1 className="text-4xl font-bold mb-8">Our Blog</h1>
+        </div>
+        <BlogList />
         <Contact />
       </main>
       <Footer />
@@ -44,4 +55,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default BlogPage;
