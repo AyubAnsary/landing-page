@@ -2,39 +2,57 @@
 import React, { useState } from "react";
 import AnimatedText from "../ui/AnimatedText";
 import { MapPin, Mail, Phone, Send, CheckCircle } from "lucide-react";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  phone: z.string().optional(),
+  company: z.string().optional(),
+  message: z.string().min(10, {
+    message: "Message must be at least 10 characters.",
+  }),
+});
 
 const Contact: React.FC = () => {
-  const [formState, setFormState] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
-    message: "",
-  });
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormState((prev) => ({ ...prev, [name]: value }));
-  };
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      company: "",
+      message: "",
+    },
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     
     // Simulate form submission
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
-      setFormState({
-        name: "",
-        email: "",
-        phone: "",
-        company: "",
-        message: "",
-      });
+      form.reset();
       
       // Reset success message after 5 seconds
       setTimeout(() => {
@@ -72,7 +90,7 @@ const Contact: React.FC = () => {
 
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className="opacity-0 animate-fade-right" style={{ animationDelay: "400ms", animationFillMode: "forwards" }}>
-            <div className="glass-card p-8 rounded-2xl">
+            <div className="glass-card p-8 rounded-2xl shadow-md bg-white/90">
               <h3 className="text-2xl font-semibold mb-6">Contact Information</h3>
               
               <div className="space-y-6 mb-8">
@@ -138,7 +156,7 @@ const Contact: React.FC = () => {
           </div>
           
           <div className="opacity-0 animate-fade-left" style={{ animationDelay: "500ms", animationFillMode: "forwards" }}>
-            <div className="glass-card p-8 rounded-2xl">
+            <div className="glass-card p-8 rounded-2xl shadow-md bg-white/90">
               <h3 className="text-2xl font-semibold mb-6">Send Us a Message</h3>
               
               {isSubmitted ? (
@@ -152,109 +170,134 @@ const Contact: React.FC = () => {
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium mb-1">
-                        Full Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <FormField
+                        control={form.control}
                         name="name"
-                        value={formState.name}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-citivise-500 focus:border-transparent transition-all duration-200"
-                        placeholder="Your name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Full Name <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Your name" 
+                                className="bg-white border-gray-200" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium mb-1">
-                        Email Address <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
+                      
+                      <FormField
+                        control={form.control}
                         name="email"
-                        value={formState.email}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-citivise-500 focus:border-transparent transition-all duration-200"
-                        placeholder="your.email@example.com"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label htmlFor="phone" className="block text-sm font-medium mb-1">
-                        Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        value={formState.phone}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-citivise-500 focus:border-transparent transition-all duration-200"
-                        placeholder="Your phone number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Email Address <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="your.email@example.com" 
+                                className="bg-white border-gray-200" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
                     </div>
                     
-                    <div>
-                      <label htmlFor="company" className="block text-sm font-medium mb-1">
-                        Company Name
-                      </label>
-                      <input
-                        type="text"
-                        id="company"
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Phone Number
+                            </FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Your phone number" 
+                                className="bg-white border-gray-200" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
                         name="company"
-                        value={formState.company}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-citivise-500 focus:border-transparent transition-all duration-200"
-                        placeholder="Your company"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">
+                              Company Name
+                            </FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Your company" 
+                                className="bg-white border-gray-200" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
                     </div>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium mb-1">
-                      Message <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      id="message"
+                    
+                    <FormField
+                      control={form.control}
                       name="message"
-                      value={formState.message}
-                      onChange={handleChange}
-                      required
-                      rows={4}
-                      className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-citivise-500 focus:border-transparent transition-all duration-200 resize-none"
-                      placeholder="How can we help you?"
-                    ></textarea>
-                  </div>
-                  
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-6 py-3 bg-citivise-600 text-white rounded-lg font-medium hover:bg-citivise-700 transition-colors duration-200 flex items-center justify-center disabled:opacity-70"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        Send Message <Send className="ml-2 w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </form>
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">
+                            Message <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <textarea
+                              rows={4}
+                              className="w-full px-4 py-2.5 bg-white rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-citivise-500 focus:border-transparent transition-all duration-200 resize-none"
+                              placeholder="How can we help you?"
+                              {...field}
+                            ></textarea>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="px-6 py-3 bg-citivise-600 text-white rounded-lg font-medium hover:bg-citivise-700 transition-colors duration-200 flex items-center justify-center disabled:opacity-70"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          Send Message <Send className="ml-2 w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </Form>
               )}
             </div>
           </div>
